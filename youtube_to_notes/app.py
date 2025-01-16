@@ -1,8 +1,14 @@
+import os
 from flask import Flask, request
 from youtube_transcript_api import YouTubeTranscriptApi
-from transformers import pipeline
+from mistralai import Mistral
 
 app = Flask(__name__)
+
+# Initialize Mistral client
+api_key = os.getenv("MISTRAL_API_KEY")
+model = "mistral-large-latest"
+client = Mistral(api_key=api_key)
 
 @app.route('/summary', methods=['GET'])
 def summary_api():
@@ -34,18 +40,41 @@ def get_transcript(video_id):
         return f"Error fetching transcript: {str(e)}"
 
 def get_notes_from_summary(transcript):
-    # Initialize the Hugging Face summarizer
-    summariser = pipeline('summarization')
     notes = ''
-    # Split the transcript into manageable chunks for summarization
-    for i in range(0, (len(transcript)//1000)+1):
-        summary_text = summariser(transcript[i*1000:(i+1)*1000])[0]['summary_text']
+    # Split the transcript into chunks of approximately 4000 characters
+    # (Mistral can handle longer contexts than the previous transformer model)
+    chunk_size = 4000
+    chunks = [transcript[i:i + chunk_size] for i in range(0, len(transcript), chunk_size)]
+    
+    for chunk in chunks:
+        # Create a prompt that instructs Mistral to generate structured notes
+        messages = [
+            {
+                "role": "system",
+                "content": "You are a note-taking assistant. Generate concise, well-structured notes from the following transcript segment. Focus on key points and main ideas."
+            },
+            {
+                "role": "user",
+                "content": f"Generate structured notes from this transcript segment:\n\n{chunk}"
+            }
+        ]
         
-        # Format the summary as notes
-        notes += f"### Key Points:\n"
-        notes += f"1. {summary_text.strip()}\n\n"
-        notes += "----------------------------------------\n"
-
+        # Get response from Mistral
+        try:
+            response = client.chat.complete(
+                model=model,
+                messages=messages,
+                max_tokens=1000,
+                temperature=0.3  # Lower temperature for more focused outputs
+            )
+            
+            # Add the summary to notes
+            summary = response.choices[0].message.content
+            notes += summary + "\n\n----------------------------------------\n\n"
+            
+        except Exception as e:
+            notes += f"Error generating summary for chunk: {str(e)}\n\n"
+    
     return notes
 
 if __name__ == '__main__':
