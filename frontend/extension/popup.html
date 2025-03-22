@@ -1,9 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Transcript Fetcher</title>
-    <script src="popup.js" defer></script>
-</head>
+    <meta charset="UTF-8">
+    <title>Agent Play</title>
+    <style>
+        body {
+        width: 200px;
+        height: 150px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        background-color: #f8f9fa;
+        font-family: Arial, sans-serif;
+        }
+        h1 {
+        font-size: 16px;
+        margin-bottom: 20px;
+        text-align: center;
+        }
+        button {
+        padding: 8px 12px;
+        border: none;
+        border-radius: 5px;
+        background-color: #007BFF;
+        color: white;
+        cursor: pointer;
+        }
+        button:hover {
+        background-color: #0056b3;
+        }
+    </style>
+    </head>
 <body>
     <button id="fetchTranscript">Show Transcript</button>
     <button id="fetchData">Show Data</button>
