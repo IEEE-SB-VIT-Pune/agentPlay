@@ -15,11 +15,5 @@
       "48": "icon.png",
       "128": "icon.png"
     }
-  },
-  "content_scripts": [
-    {
-      "matches": ["*://www.youtube.com/*"],
-      "js": ["content.js"]
-    }
-  ]
+  }
 }
