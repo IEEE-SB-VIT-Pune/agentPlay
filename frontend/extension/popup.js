@@ -20,6 +20,52 @@ document.addEventListener("DOMContentLoaded", () => {
           document.getElementById("output").textContent = "YouTube Video Detected:\n" + url;
           console.log("YouTube Video URL:", url);
           let vid_id = getYouTubeVideoID(url);
+          
+          //Summary
+          document.getElementById("fetchSummary").addEventListener("click", async () => {
+            const timeoutDuration = 100000; // 100 seconds timeout
+        
+            // Function to fetch summary with timeout
+            async function fetchWithTimeout(url, timeout) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), timeout);
+        
+                try {
+                    let response = await fetch(url, { signal: controller.signal });
+                    clearTimeout(timeoutId); // Clear timeout if response arrives
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP Error: ${response.status}`);
+                    }
+        
+                    let data = await response.json();
+                    return data;
+                } catch (error) {
+                    if (error.name === "AbortError") {
+                        throw new Error("Request timed out. Please try again.");
+                    }
+                    throw error;
+                }
+            }
+        
+            try {
+                let url = `http://127.0.0.1:5000/summary/${vid_id}`;
+                let data = await fetchWithTimeout(url, timeoutDuration);
+        
+                if (!data || !data.summary) {
+                    throw new Error("No summary available for this video.");
+                }
+        
+                console.log("Summary:", data.summary);
+                document.getElementById("output").textContent = data.summary;
+            } catch (error) {
+                console.error("Error fetching summary:", error);
+                document.getElementById("output").textContent = error.message;
+            }
+        });
+        
+
+          //Transcript
           document.getElementById("fetchTranscript").addEventListener("click", async () => {
             try {
                 let response = await fetch("http://127.0.0.1:5000/show_transcript/"+vid_id);
@@ -30,6 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error("Error fetching transcript:", error);
             }
           });
+
+          //Data
           document.getElementById("fetchData").addEventListener("click", async () => {
             try {
                 let response = await fetch("http://127.0.0.1:5000/show_data/"+vid_id);
