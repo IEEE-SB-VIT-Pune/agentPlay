@@ -370,13 +370,14 @@ async def generate_audio(video_id, target_language):
 @app.route('/listen_audio/<video_id>/<segment_number>', methods=['GET'])  # Explicitly defining GET request
 async def get_audio(video_id, segment_number):
     try:
+        segment_number = int(segment_number)
         print(video_id)
         print(type(video_id))
             
         if f"{video_id}_transcript" in globals():
             if globals()[f"{video_id}_transcript"].is_transcript_exists:
                 # send audio file
-                return send_file(f"data/{video_id}/audio/segment_{segment_number-1:04d}.mp3", mimetype="audio/mpeg")
+                return send_file(f"data/{video_id}/segment_{segment_number-1:04d}.mp3", mimetype="audio/mpeg")
             else:
                 return {"error": "No transcript available for this VIDEO"}
         else:
@@ -384,7 +385,7 @@ async def get_audio(video_id, segment_number):
             globals()[f"{video_id}_transcript"] = await TranscriptStore.create(video_id)
             return await get_audio(video_id, segment_number)
     except Exception as e:
-        return {"error": f"An error occurred: sending audio"}
+        return {"error": f"An error occurred: sending audio{e}"}
 
 @app.route('/show_transcript/<video_id>')
 async def show_transcript(video_id):

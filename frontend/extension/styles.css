@@ -44,3 +44,6 @@ pre {
     border: 1px solid #ddd;
     border-radius: 5px;
 }
+#languageForm {
+    display: none; /* Hidden initially */
+}
