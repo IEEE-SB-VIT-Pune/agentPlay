@@ -168,15 +168,28 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
 
-            //Audio handling
+            //Audio Handling
+            let audio = null; // Store the audio object globally
+            let stopPlayback = false; // Flag to stop playback
+
             document.getElementById("createAudio").addEventListener("click", () => {
                 document.getElementById("languageForm").style.display = "block"; // Show input form
+                document.getElementById("stopAudio").style.display = "block";
             });
-            
+
             document.getElementById("submitLanguage").addEventListener("click", handleLanguageInput);
             document.getElementById("targetLanguage").addEventListener("keypress", (event) => {
                 if (event.key === "Enter") {
                     handleLanguageInput();
+                }
+            });
+
+            document.getElementById("stopAudio").addEventListener("click", () => {
+                stopPlayback = true;
+                if (audio) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    document.getElementById("output").textContent = "Audio playback stopped.";
                 }
             });
 
@@ -187,8 +200,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.getElementById("output").textContent = "Please enter a target language.";
                     return;
                 }
-            
-                // Get current timestamp from YouTube
+
+                stopPlayback = false; // Reset stop flag
+
                 let currentTime = await new Promise((resolve, reject) => {
                     chrome.scripting.executeScript({
                         target: { tabId: tabs[0].id },
@@ -202,9 +216,9 @@ document.addEventListener("DOMContentLoaded", () => {
                         }
                     });
                 });
-            
+
                 console.log("Current Video Time:", currentTime);
-            
+
                 try {
                     let response = await fetch(`http://127.0.0.1:5000/show_transcript/${vid_id}`);
                     let data = await response.json();
@@ -214,64 +228,56 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.getElementById("output").textContent = "Error fetching transcript data.";
                     return;
                 }
-            
-            
-                // Find the closest transcript segment
-                let currentSegment = findClosestSegment(transcriptDataGlobal, currentTime);
-                console.log("Closest Transcript Segment:", currentSegment);
-            
-                if (currentSegment === null) {
-                    document.getElementById("output").textContent = "Could not determine the current segment.";
-                    return;
-                }
-            
-                // API URLs
-                const createAudioUrl = `http://127.0.0.1:5000/create_audio/${vid_id}/${targetLanguage}`;
-                const listenAudioUrl = `http://127.0.0.1:5000/listen_audio/${vid_id}/${currentSegment+1}`;
-            
-                try {
-                    // Step 1: Request to create audio
-                    document.getElementById("output").textContent = "Generating audio...";
-                    let response = await fetch(createAudioUrl);
-                    let data = await response.json();
-            
-                    if (data.error) {
-                        document.getElementById("output").textContent = `Error: ${data.error}`;
-                        return;
-                    }
-            
-                    // Step 2: Poll until audio is ready
-                    let audioReady = false;
-                    for (let i = 0; i < 20; i++) { // Try for up to 40 seconds (20 * 2s)
-                        await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
-            
-                        let checkResponse = await fetch(createAudioUrl);
-                        let checkData = await checkResponse.json();
-            
-                        if (checkData.message && checkData.message.includes("Audio already generated")) {
-                            audioReady = true;
-                            break;
+
+                async function playSegmentAudio() {
+                    while (!stopPlayback) {
+                        let currentVideoTime = await new Promise((resolve, reject) => {
+                            chrome.scripting.executeScript({
+                                target: { tabId: tabs[0].id },
+                                function: getCurrentVideoTime
+                            }, (results) => {
+                                if (!results || !results[0] || results[0].result === null) {
+                                    console.error("Error: Failed to fetch current video time.");
+                                    reject("Failed to fetch current video time.");
+                                } else {
+                                    resolve(results[0].result);
+                                }
+                            });
+                        });
+
+                        let currentSegmentIndex = findClosestSegment(transcriptDataGlobal, currentVideoTime);
+
+                        if (currentSegmentIndex === null) {
+                            document.getElementById("output").textContent = "Could not determine the current segment.";
+                            return;
                         }
+
+                        const listenAudioUrl = `http://127.0.0.1:5000/listen_audio/${vid_id}/${currentSegmentIndex + 1}`;
+                        
+                        console.log("Playing audio from:", listenAudioUrl);
+                        document.getElementById("output").textContent = `Playing segment ${currentSegmentIndex + 1}...`;
+
+                        if (audio) {
+                            audio.pause();
+                            audio.currentTime = 0;
+                        }
+                        
+                        audio = new Audio(listenAudioUrl);
+                        audio.play();
+
+                        // Wait for the audio to finish playing before fetching the next segment
+                        await new Promise(resolve => {
+                            audio.onended = resolve;
+                            audio.onerror = resolve; // Move to the next segment if an error occurs
+                        });
+
+                        await new Promise(resolve => setTimeout(resolve, 500)); // Small delay before checking the next segment
                     }
-            
-                    if (!audioReady) {
-                        document.getElementById("output").textContent = "Audio generation took too long.";
-                        return;
-                    }
-            
-                    // Step 3: Play audio
-                    console.log("Playing audio from:", listenAudioUrl);
-                    document.getElementById("output").textContent = "Playing audio...";
-                    let audio = new Audio(listenAudioUrl);
-                    audio.play();
-                    document.getElementById("output").textContent = "Done";
-            
-                } catch (error) {
-                    console.error("Error processing audio:", error);
-                    document.getElementById("output").textContent = "An error occurred.";
                 }
+
+                playSegmentAudio();
             }
-            
+
       } else {
           document.getElementById("output").textContent = "No YouTube video detected.";
       }

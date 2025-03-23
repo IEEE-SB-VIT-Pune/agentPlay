@@ -47,3 +47,6 @@ pre {
 #languageForm {
     display: none; /* Hidden initially */
 }
+#stopAudio {
+    display: none;
+}
