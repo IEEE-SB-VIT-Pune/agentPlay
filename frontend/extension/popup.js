@@ -200,7 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.getElementById("output").textContent = "Please enter a target language.";
                     return;
                 }
-
+                const createAudioUrl = `http://127.0.0.1:5000/create_audio/${vid_id}/${targetLanguage}`;
                 stopPlayback = false; // Reset stop flag
 
                 let currentTime = await new Promise((resolve, reject) => {
@@ -229,6 +229,35 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
+                // Step 1: Send request to create audio
+                document.getElementById("output").textContent = "Generating audio...";
+                let response = await fetch(createAudioUrl);
+                let data = await response.json();
+        
+                if (data.error) {
+                    document.getElementById("output").textContent = `Error: ${data.error}`;
+                    return;
+                }
+        
+                // Step 2: Poll until audio is ready
+                let audioReady = false;
+                for (let i = 0; i < 20; i++) { // Try for up to 20 seconds
+                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+        
+                    let checkResponse = await fetch(createAudioUrl);
+                    let checkData = await checkResponse.json();
+        
+                    if (checkData.message && checkData.message.includes("Audio already generated")) {
+                        audioReady = true;
+                        break;
+                    }
+                }
+        
+                if (!audioReady) {
+                    document.getElementById("output").textContent = "Audio generation took too long.";
+                    return;
+                }
+
                 async function playSegmentAudio() {
                     while (!stopPlayback) {
                         let currentVideoTime = await new Promise((resolve, reject) => {
@@ -244,34 +273,40 @@ document.addEventListener("DOMContentLoaded", () => {
                                 }
                             });
                         });
-
-                        let currentSegmentIndex = findClosestSegment(transcriptDataGlobal, currentVideoTime)+1;
-
-                        if (currentSegmentIndex === null) {
+                
+                        let currentSegmentIndex = findClosestSegment(transcriptDataGlobal, currentVideoTime);
+                
+                        if (currentSegmentIndex === null || currentSegmentIndex < 0 || currentSegmentIndex >= transcriptDataGlobal.length) {
                             document.getElementById("output").textContent = "Could not determine the current segment.";
                             return;
                         }
-
-                        const listenAudioUrl = `http://127.0.0.1:5000/listen_audio/${vid_id}/${currentSegmentIndex}`;
+                
+                        const listenAudioUrl = `http://127.0.0.1:5000/listen_audio/${vid_id}/${currentSegmentIndex+1}`;
                         
                         console.log("Playing audio from:", listenAudioUrl);
-                        document.getElementById("output").textContent = `Playing segment ${transcriptDataGlobal[currentSegmentIndex-1].Text}...`;
-
+                        document.getElementById("output").textContent = `Playing: ${transcriptDataGlobal[currentSegmentIndex].Text}...`;
+                
+                        // Ensure previous audio is stopped before starting new one
                         if (audio) {
                             audio.pause();
-                            audio.currentTime = 0;
+                            audio.src = "";  // Reset audio source
+                            audio = null;
                         }
-                        
+                
+                        // Create new audio object
                         audio = new Audio(listenAudioUrl);
                         audio.play();
-
+                
                         // Wait for the audio to finish playing before fetching the next segment
                         await new Promise(resolve => {
                             audio.onended = resolve;
-                            audio.onerror = resolve; // Move to the next segment if an error occurs
+                            audio.onerror = () => {
+                                console.error("Error playing audio");
+                                resolve();
+                            };
                         });
-
-                        await new Promise(resolve => setTimeout(resolve, 500)); // Small delay before checking the next segment
+                
+                        await new Promise(resolve => setTimeout(resolve, 500)); // Small delay before checking next segment
                     }
                 }
 
