@@ -202,33 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
                 const createAudioUrl = `http://127.0.0.1:5000/create_audio/${vid_id}/${targetLanguage}`;
                 stopPlayback = false; // Reset stop flag
-
-                let currentTime = await new Promise((resolve, reject) => {
-                    chrome.scripting.executeScript({
-                        target: { tabId: tabs[0].id },
-                        function: getCurrentVideoTime
-                    }, (results) => {
-                        if (!results || !results[0] || results[0].result === null) {
-                            console.error("Error: Failed to fetch current video time.");
-                            reject("Failed to fetch current video time.");
-                        } else {
-                            resolve(results[0].result);
-                        }
-                    });
-                });
-
-                console.log("Current Video Time:", currentTime);
-
-                try {
-                    let response = await fetch(`http://127.0.0.1:5000/show_transcript/${vid_id}`);
-                    let data = await response.json();
-                    transcriptDataGlobal = data.transcript;
-                } catch (error) {
-                    console.error("Error fetching transcript data:", error);
-                    document.getElementById("output").textContent = "Error fetching transcript data.";
-                    return;
-                }
-
+                
                 // Step 1: Send request to create audio
                 document.getElementById("output").textContent = "Generating audio...";
                 let response = await fetch(createAudioUrl);
@@ -255,6 +229,32 @@ document.addEventListener("DOMContentLoaded", () => {
         
                 if (!audioReady) {
                     document.getElementById("output").textContent = "Audio generation took too long.";
+                    return;
+                }
+
+                let currentTime = await new Promise((resolve, reject) => {
+                    chrome.scripting.executeScript({
+                        target: { tabId: tabs[0].id },
+                        function: getCurrentVideoTime
+                    }, (results) => {
+                        if (!results || !results[0] || results[0].result === null) {
+                            console.error("Error: Failed to fetch current video time.");
+                            reject("Failed to fetch current video time.");
+                        } else {
+                            resolve(results[0].result);
+                        }
+                    });
+                });
+
+                console.log("Current Video Time:", currentTime);
+
+                try {
+                    let response = await fetch(`http://127.0.0.1:5000/show_transcript/${vid_id}`);
+                    let data = await response.json();
+                    transcriptDataGlobal = data.transcript;
+                } catch (error) {
+                    console.error("Error fetching transcript data:", error);
+                    document.getElementById("output").textContent = "Error fetching transcript data.";
                     return;
                 }
 
