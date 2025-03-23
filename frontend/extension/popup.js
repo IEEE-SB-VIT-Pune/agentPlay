@@ -245,17 +245,17 @@ document.addEventListener("DOMContentLoaded", () => {
                             });
                         });
 
-                        let currentSegmentIndex = findClosestSegment(transcriptDataGlobal, currentVideoTime);
+                        let currentSegmentIndex = findClosestSegment(transcriptDataGlobal, currentVideoTime)+1;
 
                         if (currentSegmentIndex === null) {
                             document.getElementById("output").textContent = "Could not determine the current segment.";
                             return;
                         }
 
-                        const listenAudioUrl = `http://127.0.0.1:5000/listen_audio/${vid_id}/${currentSegmentIndex + 1}`;
+                        const listenAudioUrl = `http://127.0.0.1:5000/listen_audio/${vid_id}/${currentSegmentIndex}`;
                         
                         console.log("Playing audio from:", listenAudioUrl);
-                        document.getElementById("output").textContent = `Playing segment ${currentSegmentIndex + 1}...`;
+                        document.getElementById("output").textContent = `Playing segment ${transcriptDataGlobal[currentSegmentIndex-1].Text}...`;
 
                         if (audio) {
                             audio.pause();
