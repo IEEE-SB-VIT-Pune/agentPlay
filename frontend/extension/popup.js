@@ -227,7 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
             
                 // API URLs
                 const createAudioUrl = `http://127.0.0.1:5000/create_audio/${vid_id}/${targetLanguage}`;
-                const listenAudioUrl = `http://127.0.0.1:5000/listen_audio/${vid_id}/${currentSegment}`;
+                const listenAudioUrl = `http://127.0.0.1:5000/listen_audio/${vid_id}/${currentSegment+1}`;
             
                 try {
                     // Step 1: Request to create audio
