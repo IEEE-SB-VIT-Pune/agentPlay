@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
             //Summary
             document.getElementById("fetchSummary").addEventListener("click", async () => {
                 const timeoutDuration = 100000; // 100 seconds timeout
-        
+                console.log("Fetch summary started")
                 // Function to fetch summary with timeout
                 async function fetchWithTimeout(url, timeout) {
                     const controller = new AbortController();
@@ -71,13 +71,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 try {
                     let url = `http://127.0.0.1:5000/summary/${vid_id}`;
                     let data = await fetchWithTimeout(url, timeoutDuration);
-        
-                    if (!data || !data.summary) {
+                    console.log(data)
+                    if (!data || !data.concise_summary) {
                         throw new Error("No summary available for this video.");
                     }
         
-                    console.log("Summary:", data.summary);
-                    document.getElementById("output").textContent = data.summary;
+                    console.log("Summary:", data.concise_summary);
+                    document.getElementById("output").textContent = data.concise_summary;
                 } catch (error) {
                     console.error("Error fetching summary:", error);
                     document.getElementById("output").textContent = error.message;
@@ -158,6 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
             //Data
             document.getElementById("fetchData").addEventListener("click", async () => {
                 try {
+                    console.log("Data")
                     let response = await fetch("http://127.0.0.1:5000/show_data/"+vid_id);
                     let data = await response.json();
                     console.log("Transcript Data:", data);
@@ -200,37 +201,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.getElementById("output").textContent = "Please enter a target language.";
                     return;
                 }
-                const createAudioUrl = `http://127.0.0.1:5000/create_audio/${vid_id}/${targetLanguage}`;
+                
                 stopPlayback = false; // Reset stop flag
                 
-                // Step 1: Send request to create audio
-                document.getElementById("output").textContent = "Generating audio...";
-                let response = await fetch(createAudioUrl);
-                let data = await response.json();
-        
-                if (data.error) {
-                    document.getElementById("output").textContent = `Error: ${data.error}`;
-                    return;
-                }
-        
-                // Step 2: Poll until audio is ready
-                let audioReady = false;
-                for (let i = 0; i < 20; i++) { // Try for up to 20 seconds
-                    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
-        
-                    let checkResponse = await fetch(createAudioUrl);
-                    let checkData = await checkResponse.json();
-        
-                    if (checkData.message && checkData.message.includes("Audio already generated")) {
-                        audioReady = true;
-                        break;
-                    }
-                }
-        
-                if (!audioReady) {
-                    document.getElementById("output").textContent = "Audio generation took too long.";
-                    return;
-                }
 
                 let currentTime = await new Promise((resolve, reject) => {
                     chrome.scripting.executeScript({
@@ -281,17 +254,10 @@ document.addEventListener("DOMContentLoaded", () => {
                             return;
                         }
                 
-                        const listenAudioUrl = `http://127.0.0.1:5000/listen_audio/${vid_id}/${currentSegmentIndex+1}`;
+                        const listenAudioUrl = `http://127.0.0.1:5000/listen_audio/${vid_id}/${targetLanguage}/${currentSegmentIndex+1}`;
                         
                         console.log("Playing audio from:", listenAudioUrl);
                         document.getElementById("output").textContent = `Playing: ${transcriptDataGlobal[currentSegmentIndex].Text}...`;
-                
-                        // Ensure previous audio is stopped before starting new one
-                        if (audio) {
-                            audio.pause();
-                            audio.src = "";  // Reset audio source
-                            audio = null;
-                        }
                 
                         // Create new audio object
                         audio = new Audio(listenAudioUrl);

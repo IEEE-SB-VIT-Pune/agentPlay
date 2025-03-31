@@ -5,19 +5,51 @@
     <title>Agent Play</title>
     <script src="popup.js" defer></script>
     <link rel="stylesheet" href="styles.css">
-    </head>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
 <body>
-    <button id="fetchSummary">Show Summary</button>
-    <button id="fetchTranscript">Show Transcript</button>
-    <button id="fetchData">Show Data</button>
-    <button id="createAudio">Listen to translated audio</button>
-    <button id="stopAudio">Stop Audio</button>
-
-    <div id="languageForm">
-        <input type="text" id="targetLanguage" placeholder="Target Language (en,hi,es,fr,de,ja,ko,zh,it,pt,ru,nl,tr,pl,id,th,vi)">
-        <button id="submitLanguage">Submit</button>
+    <div class="container">
+        <header>
+            <h1>Welcome to Agent Play</h1>
+            <p class="subtitle">Your YouTube AI Assistant</p>
+        </header>
+        
+        <div class="status-bar" id="status">
+            <span class="status-icon"></span>
+            <span class="status-text">Checking video...</span>
+        </div>
+        
+        <div class="button-grid">
+            <button class="action-btn" id="fetchSummary">
+                <span class="icon">📝</span>
+                <span>Get Summary</span>
+            </button>
+            
+            <button class="action-btn" id="fetchTranscript">
+                <span class="icon">📋</span>
+                <span>Get Transcript</span>
+            </button>
+            
+            <button class="action-btn" id="fetchData">
+                <span class="icon">📊</span>
+                <span>View Data</span>
+            </button>
+            
+            <button class="action-btn" id="createAudio">
+                <span class="icon">🔊</span>
+                <span>Translate Audio</span>
+            </button>
+        </div>
+        
+        <div class="language-form" id="languageForm">
+            <input type="text" id="targetLanguage" placeholder="Enter language code (es, fr, de...)">
+            <button class="submit-btn" id="submitLanguage">Submit</button>
+            <button class="stop-btn" id="stopAudio">Stop</button>
+        </div>
+        
+        <div class="output-container">
+            <pre id="output">Ready to enhance your YouTube experience...</pre>
+        </div>
     </div>
-
-    <pre id="output"></pre>
 </body>
 </html>

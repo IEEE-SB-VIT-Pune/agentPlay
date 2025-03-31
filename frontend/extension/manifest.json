@@ -3,7 +3,7 @@
   "name": "AgentPlay - YT Enhancer",
   "version": "1.0",
   "description": "Fetches transcript data from an ongoing youtube video in the current tab",
-  "permissions": ["activeTab", "tabs", "scripting"],
+  "permissions": ["activeTab", "tabs", "scripting", "storage", "webRequest"],
   "host_permissions": ["http://127.0.0.1:5000/*"],
   "background": {
     "service_worker": "background.js"
