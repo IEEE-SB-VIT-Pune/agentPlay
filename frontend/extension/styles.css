@@ -124,6 +124,11 @@ header h1 {
     margin-top: 5px;
 }
 
+/* .chatbot {
+    display: none;
+    gap: 8px;
+    margin-top: 5px;
+} */
 .language-form input {
     flex: 1;
     padding: 8px 12px;

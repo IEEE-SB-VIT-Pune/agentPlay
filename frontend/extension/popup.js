@@ -34,13 +34,32 @@ function findClosestSegment(transcript, currentTime) {
 
 // Check if the current tab is a YouTube video
 document.addEventListener("DOMContentLoaded", () => {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       let url = tabs[0].url;
       if (url.includes("youtube.com/watch?v=")) {
-            document.getElementById("output").textContent = "YouTube Video Detected:\n" + url;
-            console.log("YouTube Video URL:", url);
-            let vid_id = getYouTubeVideoID(url);
-          
+        document.getElementById("output").textContent = "YouTube Video Detected:\n" + url;
+        console.log("YouTube Video URL:", url);
+        let vid_id = getYouTubeVideoID(url);
+        
+        // Call the precompute route with the video ID
+        fetch(`http://127.0.0.1:5000/precompute/${vid_id}`, {
+          method: 'GET'
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (response.ok) {
+            console.log("Precompute successful:", data);
+            document.getElementById("output").textContent += "\nPrecomputing complete!";
+          } else {
+            console.error("Precompute failed:", data);
+            document.getElementById("output").textContent += "\nFailed to precompute video data.";
+          }
+        })
+        .catch(error => {
+          console.error("Error calling precompute:", error);
+          document.getElementById("output").textContent += "\nError: Could not connect to server.";
+        });
+  
             //Summary
             document.getElementById("fetchSummary").addEventListener("click", async () => {
                 const timeoutDuration = 100000; // 100 seconds timeout
@@ -153,7 +172,77 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                 });
             }
-                     
+                   
+            
+            //Process Query
+                const queryInput = document.getElementById("query");
+                const submitButton = document.getElementById("submitquery");
+                const toggleMode = document.getElementById("toggleMode");
+                
+              
+                // Submit query when button is clicked
+                submitButton.addEventListener("click", async () => {
+                  const query = queryInput.value.trim();
+                  if (!query) {
+                    alert("Please enter a question");
+                    return;
+                  }
+                  
+                  
+                  // Show loading state
+                  submitButton.disabled = true;
+                  submitButton.textContent = "Processing...";
+                  
+                  try {
+                    const response = await fetch("http://127.0.0.1:5000/process", {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json"
+                      },
+                      body: JSON.stringify({
+                        query: query,
+                        addition_mode: toggleMode.checked,
+                        video_id: vid_id
+                      })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (response.ok) {
+                      // Display the answer
+                      const answerElement = document.createElement("div");
+                      answerElement.className = "answer";
+                      answerElement.innerHTML = `
+                        <h3>Answer:</h3>
+                        <p>${data.final_answer}</p>
+                        <div class="video-info">
+                          <small>From: ${data.title} by ${data.channel}</small>
+                        </div>
+                      `;
+                      
+                      // Add the answer to the chatbot div
+                      document.getElementById("chatbot").appendChild(answerElement);
+                      
+                      // Clear the input
+                      queryInput.value = "";
+                    } else {
+                      alert(`Error: ${data.error || "Unknown error occurred"}`);
+                    }
+                  } catch (error) {
+                    alert(`Network error: ${error.message}`);
+                  } finally {
+                    // Reset button state
+                    submitButton.disabled = false;
+                    submitButton.textContent = "Submit";
+                  }
+                });
+                
+                // Allow submitting with Enter key
+                queryInput.addEventListener("keypress", (event) => {
+                  if (event.key === "Enter") {
+                    submitButton.click();
+                  }
+                });
 
             //Data
             document.getElementById("fetchData").addEventListener("click", async () => {
