@@ -46,10 +46,12 @@ document.addEventListener("DOMContentLoaded", () => {
               <span class="icon">🔊</span>
               <span>Translate Audio</span>
           </button>
-          <div class="language-form" id="languageForm" style="margin-top: 10px;">
-            <input type="text" id="targetLanguage" placeholder="Enter language code (es, fr, de...)" style="padding: 8px; width: 100%; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 8px;">
-            <button class="submit-btn" id="submitLanguage">Submit</button>
-            <button class="submit-btn" id="stopAudio">Stop</button>
+          <div class="language-form" id="languageForm" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+            <input type="text" id="targetLanguage" placeholder="Enter language code (es, fr, de...)" style="padding: 10px; width: 80%; border-radius: 6px; border: 1px solid #ccc;">
+            <div style="display: flex; gap: 10px;">
+              <button class="extrabtn" id="submitLanguage" style="flex: 1;">Submit</button>
+              <button class="extrabtn" id="stopAudio" style="flex: 1; background: #999;">Stop</button>
+            </div>
           </div>
           <div class="output-container"><pre id="output"></pre></div>
         `;
@@ -71,16 +73,16 @@ document.addEventListener("DOMContentLoaded", () => {
               <span class="icon">🤖</span>
               <span>Chatbot</span>
           </button>
-          <div class="chatbot" id="chatbot" style="display: none; margin-top: 10px;">
-              <input type="text" id="query" placeholder="Ask your question" style="padding: 8px; width: 100%; border-radius: 5px; border: 1px solid #ccc; margin-bottom: 8px;">
-              <div class="toggle-container" style="margin-bottom: 10px;">
+          <div class="chatbot" id="chatbot" style="display: none; margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+              <input type="text" id="query" placeholder="Ask your question" style="padding: 10px; width: 80%; border-radius: 6px; border: 1px solid #ccc;">
+              <div class="toggle-container" style="display: flex; align-items: center; justify-content: space-between;">
                   <span>Addition Mode</span>
                   <label class="switch">
                       <input type="checkbox" id="toggleMode" checked>
                       <span class="slider round"></span>
                   </label>
               </div>
-              <button class="submit-btn" id="submitquery">Submit</button>
+              <button class="extrabtn" id="submitquery">Submit</button>
           </div>
           <div class="output-container"><pre id="output"></pre></div>
         `;
