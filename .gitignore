@@ -26,7 +26,7 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-# ignore filder
+# ignore folder
 backend/data/
 
 # PyInstaller

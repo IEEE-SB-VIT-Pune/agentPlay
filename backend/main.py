@@ -84,7 +84,7 @@ MAX_RETRIES = 3  # Maximum number of retries for failed requests
 MAX_CONCURRENT_REQUESTS = 2  # Limit the number of concurrent requests 
 
 # Initialize Mistral client
-api_key = "AO2SetJOyHJdppAaMA32iydjFWvXsLfr"  # Replace with your actual API key
+api_key = os.environ.get("MISTRAL_API_KEY") # Replace with your actual API key
 model = "mistral-large-latest"
 client = Mistral(api_key=api_key)
 
