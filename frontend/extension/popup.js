@@ -198,7 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
                    
             
-            //Process Query
+            //Process Query (chatbot)
                 const queryInput = document.getElementById("query");
                 const submitButton = document.getElementById("submitquery");
                 const toggleMode = document.getElementById("toggleMode");
@@ -268,7 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   }
                 });
 
-            Data
+            //Data
             document.getElementById("fetchData").addEventListener("click", async () => {
                 try {
                     console.log("Data")
@@ -287,8 +287,13 @@ document.addEventListener("DOMContentLoaded", () => {
             let stopPlayback = false; // Flag to stop playback
 
             document.getElementById("createAudio").addEventListener("click", () => {
-                document.getElementById("languageForm").style.display = "block"; // Show input form
-                document.getElementById("stopAudio").style.display = "block";
+                const languageForm = document.getElementById("languageForm");
+                const stopAudio = document.getElementById("stopAudio");
+                // Toggle display of languageForm
+                languageForm.style.display = (languageForm.style.display === "block") ? "none" : "block";
+
+                // Toggle display of stopAudio
+                stopAudio.style.display = (stopAudio.style.display === "block") ? "none" : "block";
             });
 
             document.getElementById("submitLanguage").addEventListener("click", handleLanguageInput);
@@ -392,9 +397,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 playSegmentAudio();
             }
 
+            //Show chatbot form and call precompute
             document.getElementById("chatbtn").addEventListener("click", () => {
-                document.getElementById("chatbot").style.display = "block"; // Show input form
-                document.getElementById("submitquery").style.display = "block";
+                document.getElementById("chatbot").style.display = (document.getElementById("chatbot").style.display==="block") ? "none":"block"; // Show input form
+                document.getElementById("submitquery").style.display = (document.getElementById("submitquery").style.display === "block") ? "none":"block";
                 // Call the precompute route with the video ID
                 fetch(`http://127.0.0.1:5000/precompute/${vid_id}`, {
                     method: 'GET'
