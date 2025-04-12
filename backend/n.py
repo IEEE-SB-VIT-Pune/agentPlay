@@ -310,7 +310,7 @@ async def create_audio_segments(transcript_data, video_id, target_language):
     print(f"Audio segments saved in: {audio_path}")
 
 class TranscriptStore:
-    def init(self, video_id, transcript_original, source_lang, original_string_transcript, whole_string_transcript_english):
+    def __init__(self, video_id, transcript_original, source_lang, original_string_transcript, whole_string_transcript_english):
         self.video_id = video_id
 
         if transcript_original is None:
@@ -611,7 +611,7 @@ def store_faiss_index(video_id, vector_store):
 def load_faiss_index(video_id):
     """ Loads the FAISS index from memory """
     print(f"🔹 Checking for FAISS index in memory for video: {video_id}")
- 
+
     if video_id not in index_cache:
         raise KeyError(f"🚨 FAISS index not found in memory for video: {video_id}")
 
@@ -696,18 +696,17 @@ async def get_audio(video_id, target_language, segment_number):
 
 @app.route('/show_transcript/<video_id>')
 async def show_transcript(video_id):
-    try:
-        if f"{video_id}_transcript" not in globals():
+   try:
+        if f"{video_id}_transcript" in globals():
+            if globals()[f"{video_id}_transcript"].is_transcript_exists:
+                return {"transcript": globals()[f"{video_id}_transcript"].transcript_original}
+            else:
+                return {"error": "No transcript available for this VIDEO"}
+        else: 
             globals()[f"{video_id}_transcript"] = await TranscriptStore.create(video_id)
-            
-        transcript_store = globals()[f"{video_id}_transcript"]
-        
-        if transcript_store.is_transcript_exists:
-            return jsonify({"transcript": transcript_store.transcript_original})
-        else:
-            return jsonify({"error": "No transcript available for this video"}), 404
-    except Exception as e:
-        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+            return await show_transcript(video_id)
+   except Exception as e:
+        return {"error": f"An error occurred: show_transcript"}
     
 @app.route('/show_data/<video_id>')
 async def show_data(video_id):
@@ -866,4 +865,4 @@ async def process_and_generate_audio(video_id, target_language, segment_number):
         print(f"❌ Error in background processing: {e}")
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    app.run(host='127.0.0.1', port=5001, debug=True)

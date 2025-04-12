@@ -41,24 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("YouTube Video URL:", url);
         let vid_id = getYouTubeVideoID(url);
         
-        // Call the precompute route with the video ID
-        fetch(`http://127.0.0.1:5000/precompute/${vid_id}`, {
-          method: 'GET'
-        })
-        .then(response => response.json())
-        .then(data => {
-          if (response.ok) {
-            console.log("Precompute successful:", data);
-            document.getElementById("output").textContent += "\nPrecomputing complete!";
-          } else {
-            console.error("Precompute failed:", data);
-            document.getElementById("output").textContent += "\nFailed to precompute video data.";
-          }
-        })
-        .catch(error => {
-          console.error("Error calling precompute:", error);
-          document.getElementById("output").textContent += "\nError: Could not connect to server.";
-        });
+
   
             //Summary
             document.getElementById("fetchSummary").addEventListener("click", async () => {
@@ -102,8 +85,49 @@ document.addEventListener("DOMContentLoaded", () => {
                     document.getElementById("output").textContent = error.message;
                 }
             });
-        
 
+            document.getElementById("fetchNotes").addEventListener("click", async () => {
+                const timeoutDuration = 100000; // 100 seconds timeout
+                console.log("Fetch notes started")
+                // Function to fetch summary with timeout
+                async function fetchWithTimeout(url, timeout) {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), timeout);
+        
+                    try {
+                        let response = await fetch(url, { signal: controller.signal });
+                        clearTimeout(timeoutId); // Clear timeout if response arrives
+                    
+                        if (!response.ok) {
+                            throw new Error(`HTTP Error: ${response.status}`);
+                        }
+        
+                        let data = await response.json();
+                        return data;
+                    } catch (error) {
+                        if (error.name === "AbortError") {
+                            throw new Error("Request timed out. Please try again.");
+                        }
+                        throw error;
+                    }
+                }
+        
+                try {
+                    let url = `http://127.0.0.1:5000/notes/${vid_id}`;
+                    let data = await fetchWithTimeout(url, timeoutDuration);
+                    console.log(data)
+                    if (!data || !data.notes) {
+                        throw new Error("No notes available for this video.");
+                    }
+        
+                    //console.log("Summary:", data.concise_summary);
+                    document.getElementById("output").textContent = data.notes;
+                } catch (error) {
+                    console.error("Error fetching notes:", error);
+                    document.getElementById("output").textContent = error.message;
+                }
+            });
+        
             //Transcript
             let intervalId; // To store the interval for updating the transcript
 
@@ -244,7 +268,7 @@ document.addEventListener("DOMContentLoaded", () => {
                   }
                 });
 
-            //Data
+            Data
             document.getElementById("fetchData").addEventListener("click", async () => {
                 try {
                     console.log("Data")
@@ -367,6 +391,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 playSegmentAudio();
             }
+
+            document.getElementById("chatbtn").addEventListener("click", () => {
+                document.getElementById("chatbot").style.display = "block"; // Show input form
+                document.getElementById("submitquery").style.display = "block";
+                // Call the precompute route with the video ID
+                fetch(`http://127.0.0.1:5000/precompute/${vid_id}`, {
+                    method: 'GET'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                    if (response.ok) {
+                        console.log("Precompute successful:", data);
+                        document.getElementById("output").textContent += "\nPrecomputing complete!";
+                    } else {
+                        console.error("Precompute failed:", data);
+                        document.getElementById("output").textContent += "\nFailed to precompute video data.";
+                    }
+                    })
+                    .catch(error => {
+                    console.error("Error calling precompute:", error);
+                    document.getElementById("output").textContent += "\nError: Could not connect to server.";
+                    });
+            });
 
       } else {
           document.getElementById("output").textContent = "No YouTube video detected.";
