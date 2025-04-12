@@ -27,7 +27,7 @@ share/python-wheels/
 MANIFEST
 
 # ignore filder
-/data
+backend/data/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -132,9 +132,9 @@ steps.txt/
 .steps
 .steps/
 steps
-.env
+backend/.env
 .venv
-env/
+backend/env/
 venv/
 ENV/
 env.bak/
