@@ -28,6 +28,7 @@ MANIFEST
 
 # ignore folder
 backend/data
+backend/env
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

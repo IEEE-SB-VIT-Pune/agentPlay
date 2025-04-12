@@ -6,19 +6,15 @@ from youtube_transcript_api._errors import TranscriptsDisabled, NoTranscriptFoun
 from mistralai import Mistral
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import asyncio
-import aiohttp
 from mtranslate import translate
 import json
 import os
 import edge_tts
 from crew_helper import count_words_and_translate, translate_segment
 import asyncio
-from collections import defaultdict
-import base64
 import faiss
 import os
 import yt_dlp
-import torch
 from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 from langchain.prompts import PromptTemplate
 from langchain.chains.question_answering import load_qa_chain
@@ -26,7 +22,6 @@ from langchain_community.vectorstores import FAISS
 from langchain.schema import Document
 from crewai import Agent, Task, Crew, LLM, Process
 from crewai_tools import SerperDevTool
-import traceback
 
 # Disable OpenTelemetry tracing if it's causing issues
 try:
@@ -169,14 +164,14 @@ async def process_transcript(transcript_original, whole_transcript, video_id, so
 
         segment_start_word_idx = sum(len(s['Text'].split()) for s in transcript_original[:i])
 
-        left_idx = max(0, segment_start_word_idx - 50)
-        right_idx = min(total_words, segment_start_word_idx + segment_word_count + 50)
+        left_idx = max(0, segment_start_word_idx - 10)
+        right_idx = min(total_words, segment_start_word_idx + segment_word_count + 15)
 
         if i == 0:
             left_idx = 0
-            right_idx = min(100, total_words)
+            right_idx = min(50, total_words)
         elif i == len(transcript_original) - 1:
-            left_idx = max(0, total_words - 100)
+            left_idx = max(0, total_words - 50)
             right_idx = total_words
 
         context_text = " ".join(whole_words[left_idx:right_idx])
