@@ -10,6 +10,7 @@ cd agentPlay
 2. Set Up the Environment
    
    - Create and activate a virtual environment:
+     
    ```bash
    python -m venv env
    env/Scripts/activate
