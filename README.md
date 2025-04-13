@@ -25,9 +25,9 @@ cd agentPlay
    - Create a .env file in the project root with your configurations:
    
    ```bash
-   GEMINI_API_KEY=“<GEMINI_KEY>“
-   SERPER_API_KEY=“<SERPER_KEY>“
-   MISTRAL_API_KEY=“<MISTRAL_KEY”
+   GEMINI_API_KEY="<GEMINI_KEY>"
+   SERPER_API_KEY="<SERPER_KEY>"
+   MISTRAL_API_KEY="<MISTRAL_KEY>"
    ```
 4. Run App:
    
