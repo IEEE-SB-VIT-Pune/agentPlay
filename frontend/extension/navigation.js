@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
         featureView.innerHTML = `
           <div class="status-bar" id="status">
               <span class="status-icon"></span>
-              <span class="status-text">Checking video...</span>
+              
           </div>
           <button class="action-btn" id="fetchSummary">
               <span class="icon">📝</span>
@@ -47,10 +47,10 @@ document.addEventListener("DOMContentLoaded", () => {
               <span>Translate Audio</span>
           </button>
           <div class="language-form" id="languageForm" style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-            <input type="text" id="targetLanguage" placeholder="Enter language code (es, fr, de...)" style="padding: 10px; width: 80%; border-radius: 6px; border: 1px solid #ccc;">
+            <input type="text" id="targetLanguage" placeholder="Enter language code (es, fr, de...)" style="padding: 10px; width: 94% ; border-radius: 6px; border: 1px solid #ccc;">
             <div style="display: flex; gap: 10px;">
               <button class="extrabtn" id="submitLanguage" style="flex: 1;">Submit</button>
-              <button class="extrabtn" id="stopAudio" style="flex: 1; background: #999;">Stop</button>
+              <button class="extrabtn" id="stopAudio" style="flex: 1;">Stop</button>
             </div>
           </div>
           <div class="output-container"><pre id="output"></pre></div>
@@ -71,10 +71,10 @@ document.addEventListener("DOMContentLoaded", () => {
         featureView.innerHTML = `
           <button class="action-btn" id="chatbtn">
               <span class="icon">🤖</span>
-              <span>Chatbot</span>
+              <span>Get your answers</span>
           </button>
           <div class="chatbot" id="chatbot" style="display: none; margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-              <input type="text" id="query" placeholder="Ask your question" style="padding: 10px; width: 80%; border-radius: 6px; border: 1px solid #ccc;">
+              <input type="text" id="query" placeholder="Ask your question" style="padding: 10px; width: 94%; border-radius: 6px; border: 1px solid #ccc;">
               <div class="toggle-container" style="display: flex; align-items: center; justify-content: space-between;">
                   <span>Addition Mode</span>
                   <label class="switch">

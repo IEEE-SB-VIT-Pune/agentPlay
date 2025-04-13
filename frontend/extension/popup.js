@@ -105,8 +105,9 @@ function initializePopupLogic() {
             if (languageForm) languageForm.style.display = (languageForm.style.display === "block") ? "none" : "block";
             if (stopAudio) stopAudio.style.display = (stopAudio.style.display === "block") ? "none" : "block";
         });
-
+        
         safeBind("submitLanguage", handleLanguageInput);
+        safeBind("stopAudio", stopAudio);
 
         const langInput = document.getElementById("targetLanguage");
         if (langInput) {
