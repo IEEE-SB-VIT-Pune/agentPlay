@@ -3,7 +3,7 @@
 1. Clone the repository
 
 ```bash
-https://github.com/yourusername/agentPlay.git
+https://github.com/IEEE-SB-VIT-Pune/agentPlay.git 
 cd agentPlay
 ```
 
@@ -19,7 +19,7 @@ cd agentPlay
    - Install the dependencies:
      
    ```bash
-   pip install -r requirements.txt
+   pip install -r backend/requirements.txt
    ```
    
    - Create a .env file in the project root with your configurations:
@@ -32,7 +32,7 @@ cd agentPlay
 4. Run App:
    
     ```bash
-    python main.py 
+    python backend/main.py  
     ```
 
 ### 🧩 Running the Chrome Extension
