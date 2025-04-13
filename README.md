@@ -29,7 +29,7 @@ cd agentPlay
    SERPER_API_KEY=“<SERPER_KEY>“
    MISTRAL_API_KEY=“<MISTRAL_KEY”
    ```
-4. Run Flask App:
+4. Run App:
    
     ```bash
     python main.py 
