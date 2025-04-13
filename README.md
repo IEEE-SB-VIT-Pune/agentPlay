@@ -44,7 +44,79 @@ cd agentPlay
 - Browse to the frontend/extension directory and select it.
 - The extension should now be loaded and active.
 
-On Windows:
+### Flowchart
+
+The following flowchart illustrates the system's architecture and data flow:
+
+```mermaid
+flowchart TD
+    classDef clientNode fill:#f9d5e5,stroke:#333,stroke-width:1px,color:#333,font-weight:bold
+    classDef processNode fill:#eeeeee,stroke:#333,stroke-width:1px,color:#333
+    classDef decisionNode fill:#e3f0f7,stroke:#333,stroke-width:1px,color:#333,font-weight:bold
+    classDef storeNode fill:#d0f0c0,stroke:#333,stroke-width:1px,color:#333
+    classDef outputNode fill:#ffeb99,stroke:#333,stroke-width:1px,color:#333,font-weight:bold
+    classDef crewAINode fill:#d8e1fa,stroke:#333,stroke-width:1px,color:#333
+    classDef highlightNode fill:#ffd580,stroke:#ff8c00,stroke-width:2px,color:#333,font-weight:bold
+    
+    A[User Request] --> B[Video ID & Target Language]
+    
+    B --> C{Transcript<br>Exists?}
+    C -->|No| D[Create Transcript Store]
+    D --> E[Fetch YouTube Transcript]
+    E --> F{Source Lang<br>is English?}
+    
+    F -->|Yes| G[Use Original Transcript]
+    F -->|No| H[Translate to English]
+    
+    C -->|Yes| I{Audio Segment<br>Exists?}
+    
+    G --> J[Store English Transcript]
+    H --> J
+    
+    I -->|No| K[Process Missing Segment]
+    I -->|Yes| L[Serve Existing Audio]
+    
+    K --> M[Extract Context Window]
+    M --> N[Translate Segment]
+    
+    subgraph crewAI [CrewAI Translation Process]
+        direction TB
+        H1[Split Text into<br>500-word Chunks] --> H2[Process Chunks<br>Concurrently]
+        H2 --> H3[Translation Agent]
+        H3 --> H4[Join Results]
+    end
+    
+    subgraph context [Contextual Translation]
+        direction TB
+        N1[Extract 100-word Context] --> N2[CrewAI Translation Agent]
+        N2 --> N3[Context-Aware Translation]
+    end
+    
+    H --> crewAI
+    crewAI --> H
+    
+    N --> context
+    context --> N
+    
+    N --> O[Generate Audio in<br>Target Language]
+    O --> P[Save Audio Segment]
+    P --> L
+    
+    J --> Q[Create Summary]
+    Q --> R[Store Summary]
+    
+    L --> S[Return Audio to Client]
+    R --> T[Return Summary to Client]
+    
+    class A,B clientNode
+    class D,E,G,H,K,M,N,O,P,Q processNode
+    class C,F,I decisionNode
+    class J,R storeNode
+    class S,T outputNode
+    class H1,H2,H3,H4,N1,N2,N3 crewAINode
+    class H1,N1 highlightNode
+```
+
 ### Key Components
 
 - **Transcript Extraction**: YouTube transcripts are extracted using YouTube Transcript API
