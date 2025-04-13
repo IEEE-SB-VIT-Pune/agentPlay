@@ -1,3 +1,6 @@
+Create a virtual environment:
+python -m venv env
+
 ## How to run
 
 In the backend folder, run the main.py file to start the server, then load the frontend folder as a chrome extension (Manage extensions -> Load unpacked -> then browse and select the extension folder in the frontend folder)
