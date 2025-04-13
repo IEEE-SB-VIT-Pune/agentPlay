@@ -1,4 +1,8 @@
-Create a virtual environment:
+## Setup Instructions
+
+1. Create a virtual environment:
+
+```bash
 python -m venv env
 
 ## How to run
