@@ -231,6 +231,10 @@ async function highlightAndScrollTranscript(currentSegment) {
     }, 100); // Small delay to ensure rendering
 }
 
+// Add a global state variable to track processing status
+let isProcessing = false;
+let currentAudio = null;
+
 async function handleLanguageInput() {
     const targetLang = document.getElementById("targetLanguage").value.trim();
     if (!targetLang) {
@@ -238,6 +242,13 @@ async function handleLanguageInput() {
         return;
     }
     
+    // Prevent new requests while processing
+    if (isProcessing) {
+        document.getElementById("output").textContent = "Already processing a request. Please wait or stop the current process.";
+        return;
+    }
+    
+    isProcessing = true;
     document.getElementById("output").textContent = "Processing request...";
     stopPlayback = false;
     
@@ -263,12 +274,24 @@ async function handleLanguageInput() {
         }
         
         // Now play the audio
-        document.getElementById("output").textContent = `Starting playback in ${targetLang}...`;
         await playSegmentAudio(targetLang);
     } catch (err) {
         console.error("Language input error:", err);
         document.getElementById("output").textContent = `Error: ${err.message || "Failed to process audio"}`;
+    } finally {
+        isProcessing = false;
     }
+}
+
+// Implement a proper stop function
+function stopAudio() {
+    stopPlayback = true;
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+    }
+    document.getElementById("output").textContent = "Playback stopped.";
+    isProcessing = false;
 }
 
 async function playSegmentAudio(targetLang) {
@@ -311,32 +334,50 @@ async function playSegmentAudio(targetLang) {
                 return;
             }
 
-            // Construct URL and play
+            // Construct URL
             const listenUrl = `http://127.0.0.1:5000/listen_audio/${vid_id}/${targetLang}/${segmentIdx + 1}`;
             console.log("Fetching audio from:", listenUrl);
             
-            document.getElementById("output").textContent = `Playing: ${transcriptDataGlobal[segmentIdx].Text}...`;
+            // Update UI to show generating status
+            document.getElementById("output").textContent = `Generating audio for: "${transcriptDataGlobal[segmentIdx].Text.substring(0, 50)}${transcriptDataGlobal[segmentIdx].Text.length > 50 ? '...' : ''}"`;
             
-            // Create and play audio
-            audio = new Audio(listenUrl);
+            // Create audio element
+            currentAudio = new Audio(listenUrl);
+            
+            // Set up loading event to update UI
+            currentAudio.addEventListener('canplaythrough', () => {
+                if (!stopPlayback) {
+                    document.getElementById("output").textContent = `Playing: "${transcriptDataGlobal[segmentIdx].Text.substring(0, 50)}${transcriptDataGlobal[segmentIdx].Text.length > 50 ? '...' : ''}"`;
+                }
+            });
             
             try {
-                await audio.play();
+                await currentAudio.play();
                 console.log("Playing audio...");
                 
                 // Wait for audio to finish
                 await new Promise(resolve => {
-                    audio.onended = () => {
+                    currentAudio.onended = () => {
                         console.log("Audio playback ended");
+                        currentAudio = null;
                         resolve();
                     };
-                    audio.onerror = () => {
-                        console.error("Audio playback error");
+                    currentAudio.onerror = (e) => {
+                        console.error("Audio playback error", e);
+                        currentAudio = null;
                         resolve();
                     };
                 });
+                
+                // Check if playback was stopped during audio
+                if (stopPlayback) {
+                    break;
+                }
             } catch (audioError) {
                 console.error("Audio playback failed:", audioError);
+                document.getElementById("output").textContent = `Audio playback failed: ${audioError.message}`;
+                currentAudio = null;
+                await new Promise(res => setTimeout(res, 1000));
             }
 
             // Small delay between segments
@@ -346,7 +387,12 @@ async function playSegmentAudio(targetLang) {
     } catch (error) {
         console.error("Playback error:", error);
         document.getElementById("output").textContent = `Playback error: ${error.message}`;
+    } finally {
+        isProcessing = false;
     }
 }
+
+// Make sure to connect this function to your stop button
+document.getElementById("stopAudio").addEventListener("click", stopAudio);
 
 document.addEventListener("DOMContentLoaded", initializePopupLogic);
