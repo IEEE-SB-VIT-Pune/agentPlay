@@ -89,6 +89,18 @@ flowchart TD
 - **Audio Generation**: Edge TTS converts translated text to natural-sounding speech
 - **Caching System**: Processed segments are stored for future requests
 
+### Chrome Extension
+
+- The extension provides a user interface overlay for YouTube videos, allowing users to interact with the translation and language learning features
+- Features a popup interface that detects when users are on a YouTube video page
+- Includes buttons for fetching english transcript, creating real-time translations, and generating summary and notes
+- Implements a sync system that highlights transcript lines as the video plays, helping users follow along
+- Contains a language selection form where users can specify their target language for translation
+- Features an audio playback system that retrieves translated audio segments from the backend server and plays them in real time with the current video timestamp
+- Implements proper error handling for various scenarios like missing transcripts or connectivity issues
+- Caches transcript data locally to improve performance for repeated operations
+- Requires proper permissions in the manifest file, including access to YouTube domains and scripting capabilities
+
 ### Supported Languages
 
 The system supports translation and audio generation for multiple languages, including English, Hindi, Spanish, French, German, Japanese, Korean, Chinese, and more.
