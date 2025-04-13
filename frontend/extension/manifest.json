@@ -1,19 +1,42 @@
 {
-    "manifest_version": 3,
-    "name": "AgentPlay - YT Enhancer",
-    "version": "1.0",
-    "permissions": ["activeTab", "scripting"],
-    "background": {
-      "service_worker": "background.js"
+  "manifest_version": 3,
+  "name": "AgentPlay - YouTube AI Assistant",
+  "version": "1.0",
+  "description": "Enhances YouTube videos with AI translation, summarization, and Q&A features.",
+  "permissions": ["activeTab", "tabs","scripting", "storage","webRequest"],
+  "host_permissions": ["http://127.0.0.1:5000/*", "https://*.youtube.com/*"],
+  "content_scripts": [
+    {
+      "matches": ["*://www.youtube.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["sidebar.html", "popup.js", "styles.css","icon.png","navigation.js"],
+      "matches": ["*://www.youtube.com/*"]
+    }
+  ],
+  "icons": {
+      "16": "icon.png",
+      "48": "icon.png",
+      "128": "icon.png"
     },
-    "action": {
-      "default_popup": "popup.html"
-    },
-    "content_scripts": [
-      {
-        "matches": ["*://www.youtube.com/*"],
-        "js": ["content.js"]
-      }
-    ]
+  "commands": {
+    "toggle-panel": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+A",
+        "mac": "Command+Shift+A"
+      },
+      "description": "Toggle AgentPlay Panel"
+    }
   }
+}
+
+
+
+
+    
   
