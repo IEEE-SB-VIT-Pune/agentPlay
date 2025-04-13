@@ -1,11 +1,42 @@
-## Setup Instructions
+# 🚀 Quick Start
 
-1. Create a virtual environment:
+1. Clone the repository
 
 ```bash
-python -m venv env
+https://github.com/yourusername/agentPlay.git
+cd agentPlay
 ```
+2. Set Up the Environment
+   -Create and activate a virtual environment:
+   ```bash
+   python -m venv env
+   env/Scripts/activate
+   ```
+   -Install the dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+   -Create a .env file in the project root with your configurations:
+   ```bash
+   GEMINI_API_KEY=“<GEMINI_KEY>“
+   SERPER_API_KEY=“<SERPER_KEY>“
+   MISTRAL_API_KEY=“<MISTRAL_KEY”
+   ```
+3. Run Flask App:
+    ```bash
+    python main.py 
+    ```
 
+### 🧩 Running the Chrome Extension
+- Open Google Chrome.
+- Click the three dots in the top-right corner.
+- Go to Extensions > Manage Extensions.
+- Enable Developer Mode (toggle at the top-right).
+-Click Load Unpacked.
+-Browse to the frontend/extension directory and select it.
+-The extension should now be loaded and active.
+
+On Windows:
 ### Key Components
 
 - **Transcript Extraction**: YouTube transcripts are extracted using YouTube Transcript API
