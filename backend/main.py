@@ -205,25 +205,28 @@ async def process_transcript(transcript_original, whole_transcript, video_id, so
     return data 
 
 async def get_transcript_with_timestamps_async(video_id):
+    ytt_api = YouTubeTranscriptApi()
     """Get the transcript with timestamps from a YouTube video ID."""
     try:
         transcript_list = None
         source_language = None
 
         try:
-            transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=['en'])
+            transcript_list = ytt_api.fetch(video_id)
             source_language = 'en'
+            #transcript_list = transcript.find_transcript('en')
             print("Using English transcript (no translation needed)")
         except Exception as e:
             print(f"English transcript not available: {str(e)}")
             try:
-                transcript_list = YouTubeTranscriptApi.get_transcript(video_id, languages=['hi'])
+                transcript_list = ytt_api.fetch(video_id,languages=['hi', 'en'])
                 source_language = 'hi'
+                #transcript_list = transcript.find_transcript('hi')
                 print("Using Hindi transcript, translating to English")
             except Exception as e:
                 print(f"Hindi transcript not available: {str(e)}")
                 try:
-                    available_transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
+                    available_transcripts = ytt_api.list(video_id)
                     for transcript in available_transcripts:
                         transcript_list = transcript.fetch()
                         source_language = transcript.language_code
@@ -237,7 +240,7 @@ async def get_transcript_with_timestamps_async(video_id):
         if not transcript_list:
             print("No transcript available")
             return None, None, None
-
+        transcript_list = transcript_list.to_raw_data()
         data = []
         string_transcript = ""
 
